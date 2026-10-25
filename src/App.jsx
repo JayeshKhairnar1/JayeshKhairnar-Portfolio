@@ -3,17 +3,26 @@ import React, { useEffect, useState } from "react";
 
 export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem("portfolio-theme") || "dark");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     localStorage.setItem("portfolio-theme", theme);
   }, [theme]);
 
+  useEffect(() => {
+    const closeOnEscape = event => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, []);
+
   const skills = [
     { title: "Backend", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/dotnetcore/dotnetcore-original.svg", items: [".NET Core", "ASP.NET MVC", "Web API", "C#", "REST APIs", "JWT"] },
     { title: "Frontend", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg", items: ["React", "JavaScript", "HTML5", "CSS3", "jQuery", "Razor Pages"] },
     { title: "Database", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/microsoftsqlserver/microsoftsqlserver-original.svg", items: ["SQL Server", "EF Core", "Stored Procedures", "CTEs", "Firestore"] },
-    { title: "Tools & Practices", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/azure/azure-original.svg", items: ["Git", "Azure CI/CD", "Snyk", "NLog", "Repository Pattern"] },
+    { title: "Tools", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/azure/azure-original.svg", items: ["Git", "Azure CI/CD", "Snyk","Cursor","Github Copilot"] },
   ];
 
   const projects = [
@@ -132,7 +141,7 @@ export default function App() {
     :root[data-theme='light'] {
       --bg: #f7f5fb;
       --panel: #ffffff;
-      --panel2: #eeeaf7;
+      --panel2: #efecf7;
       --text: #201a2d;
       --muted: #716a7d;
       --violet: #6746c4;
@@ -142,6 +151,41 @@ export default function App() {
       --green: var(--violet);
       color-scheme: light;
     }
+
+    :root[data-theme='light'] .navlinks a { color: var(--muted); }
+    :root[data-theme='light'] .navlinks a:hover,
+    :root[data-theme='light'] .nav-contact { color: var(--violet) !important; }
+    :root[data-theme='light'] .nav-contact { border-color: var(--line); }
+    :root[data-theme='light'] .surface,
+    :root[data-theme='light'] .project,
+    :root[data-theme='light'] .mini-product,
+    :root[data-theme='light'] .stat { background: var(--panel); }
+    :root[data-theme='light'] .surface,
+    :root[data-theme='light'] .project { background: linear-gradient(145deg, #ffffff, #f5f2fb); }
+    :root[data-theme='light'] .about-text,
+    :root[data-theme='light'] .bullet-list,
+    :root[data-theme='light'] .project li { color: var(--muted); }
+    :root[data-theme='light'] .tag,
+    :root[data-theme='light'] .skill-card .tag,
+    :root[data-theme='light'] .project .tag { background: #f1edf8; border-color: #ded6ef; color: #554d63; }
+    :root[data-theme='light'] .edu-icon { background: var(--violet-soft); }
+    :root[data-theme='light'] .btn-secondary {
+      background: #f2eff8;
+      color: var(--violet-strong);
+      border-color: #dcd5e9;
+    }
+    :root[data-theme='light'] .btn-secondary:hover { background: #e9e3f4; }
+    :root[data-theme='light'] .contact-panel {
+      border-color: #d8d1e7;
+      background:
+        radial-gradient(ellipse at 100% 0%, rgba(103,70,196,.12), transparent 48%),
+        var(--panel);
+      box-shadow: 0 24px 60px rgba(47,36,72,.08);
+    }
+    :root[data-theme='light'] .contact-email { color: var(--violet) !important; }
+    :root[data-theme='light'] .timeline { border-left-color: var(--line); }
+    :root[data-theme='light'] .timeline-item::before { box-shadow: 0 0 12px var(--violet-soft); }
+    :root[data-theme='light'] footer { color: var(--muted); }
 
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; scroll-padding-top: 90px; }
@@ -213,6 +257,7 @@ export default function App() {
     }
 
     .nav-actions { display: flex; align-items: center; gap: 10px; }
+    .menu-toggle { display: none; }
     .theme-toggle {
       width: 38px; height: 38px; padding: 0;
       display: grid; place-items: center;
@@ -535,14 +580,60 @@ export default function App() {
     .footer-inner a { color: var(--green); }
 
     @media (max-width: 760px) {
-      .nav { min-height: 65px; }
+      .portfolio .topbar { width: auto; min-height: 65px; position: sticky; }
+      .portfolio .nav {
+        position: static;
+        inset: auto;
+        width: auto;
+        min-height: 65px;
+        height: auto;
+        padding: 0;
+        flex-direction: row;
+        align-items: center;
+        background: transparent;
+        border: 0;
+        backdrop-filter: none;
+      }
       .hero { min-height: unset; grid-template-columns: 1fr; gap: 36px; }
       .portrait-panel { justify-self: center; max-width: 330px; }
       .portrait-frame { height: 370px; }
       .portrait-caption strong { font-size: 13px; }
       .hero-meta { grid-column: 1; }
-      .navlinks { gap: 14px; }
+      .nav { gap: 12px; }
+      .navlinks { gap: 10px; min-width: 0; }
       .navlinks a { font-size: 10px; }
+      .nav-actions { position: relative; }
+      .menu-toggle {
+        width: 38px; height: 38px; display: grid; place-content: center; gap: 4px;
+        padding: 0; border: 1px solid var(--line); border-radius: 8px;
+        background: var(--panel); color: var(--text); cursor: pointer;
+      }
+      .menu-toggle i {
+        width: 17px; height: 1.5px; display: block;
+        background: currentColor; transition: transform .2s, opacity .2s;
+      }
+      .menu-toggle[aria-expanded='true'] i:first-child { transform: translateY(5.5px) rotate(45deg); }
+      .menu-toggle[aria-expanded='true'] i:nth-child(2) { opacity: 0; }
+      .menu-toggle[aria-expanded='true'] i:last-child { transform: translateY(-5.5px) rotate(-45deg); }
+      .portfolio .navlinks {
+        position: absolute; top: calc(100% + 13px); right: 0;
+        width: min(270px, calc(100vw - 30px)); display: grid; gap: 2px;
+        padding: 8px; border: 1px solid var(--line); border-radius: 10px;
+        background: var(--panel); box-shadow: 0 20px 50px rgba(0,0,0,.28);
+        opacity: 0; visibility: hidden; transform: translateY(-8px);
+        transition: opacity .18s, visibility .18s, transform .18s;
+      }
+      .portfolio .navlinks.is-open { opacity: 1; visibility: visible; transform: translateY(0); }
+      .portfolio .navlinks a,
+      .portfolio .navlinks a:nth-child(2),
+      .portfolio .navlinks a:nth-child(3),
+      .portfolio .navlinks a:nth-child(4) { display: flex; }
+      .portfolio .navlinks a {
+        min-height: 42px; align-items: center; padding: 0 12px;
+        border-radius: 7px; font-size: 12px;
+      }
+      .portfolio .navlinks a:hover { background: var(--violet-soft); }
+      .portfolio .navlinks .nav-contact { justify-content: space-between; margin-top: 4px; }
       .recognition-layout { grid-template-columns: 1fr; }
       .certificate-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
       .skill-grid { gap: 10px; }
@@ -550,7 +641,8 @@ export default function App() {
       .skill-card-head { margin-bottom: 18px; }
       .skill-card h3 { font-size: 13px; }
       .skill-icon-wrap { width: 42px; height: 42px; }
-      .navlinks a:nth-child(2), .navlinks a:nth-child(3) { display: none; }
+      .navlinks a:nth-child(2),
+      .navlinks a:nth-child(3) { display: none; }
       .hero { padding: 75px 0 60px; }
       .hero h1 { letter-spacing: -2.5px; }
       .hero-copy { font-size: 14px; }
@@ -565,9 +657,10 @@ export default function App() {
     }
 
     @media (max-width: 420px) {
-      .container { width: calc(100% - 30px); }
-      .navlinks { gap: 10px; }
-      .nav-contact { padding: 7px 9px; }
+      .portfolio .container { width: calc(100% - 30px); }
+      .nav { gap: 8px; }
+      .navlinks { gap: 0; }
+      .nav-contact { padding: 7px 9px; white-space: nowrap; }
       .nav-actions { gap: 7px; }
       .theme-toggle { width: 34px; height: 34px; }
       .award-featured { grid-template-columns: 56px 1fr; padding: 18px; min-height: 155px; }
@@ -604,13 +697,24 @@ export default function App() {
         <nav className="container nav" aria-label="Main navigation">
           <a className="brand" href="#home" aria-label="Jayesh Khairnar, back to home">JK</a>
           <div className="nav-actions">
-            <div className="navlinks">
-              <a href="#about">About</a>
-              <a href="#skills">Skills</a>
-              <a href="#experience">Experience</a>
-              <a href="#projects">Projects</a>
-              <a className="nav-contact" href="#contact">Let's connect ↗</a>
+            <div className={`navlinks${menuOpen ? " is-open" : ""}`} id="mobile-navigation">
+              <a href="#about" onClick={() => setMenuOpen(false)}>About</a>
+              <a href="#skills" onClick={() => setMenuOpen(false)}>Skills</a>
+              <a href="#experience" onClick={() => setMenuOpen(false)}>Experience</a>
+              <a href="#projects" onClick={() => setMenuOpen(false)}>Projects</a>
+              <a className="nav-contact" href="#contact" onClick={() => setMenuOpen(false)}>Let's connect ↗</a>
             </div>
+            <button
+              className="menu-toggle"
+              type="button"
+              onClick={() => setMenuOpen(open => !open)}
+              aria-expanded={menuOpen}
+              aria-controls="mobile-navigation"
+              aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+              title={menuOpen ? "Close menu" : "Open menu"}
+            >
+              <i /><i /><i />
+            </button>
             <button
               className="theme-toggle"
               type="button"
@@ -882,8 +986,8 @@ export default function App() {
                   roles where I can deliver reliable products, measurable improvements,
                   and strong cross-team ownership.
                 </p>
-                <p style={{ marginTop: 15, color: "#c4f56b" }}>
-                  jayeshkhairnar6@gmail.com · +91 8275593088
+                <p className="contact-email" style={{ marginTop: 15 }}>
+                  jayeshkhairnar6@gmail.com 
                 </p>
               </div>
               <div className="contact-actions">
